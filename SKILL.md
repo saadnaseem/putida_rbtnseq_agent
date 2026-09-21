@@ -16,8 +16,14 @@ with instructions. To set it up, follow `docs/DATA.md` (download ~120 MB, then
 `python scripts/build_cache.py`).
 
 ```bash
-SKILL=$(dirname "$0")                      # this skill's directory
-export PUTIDA_RBTNSEQ_DATA=~/data/rbtnseq  # where the dataset lives
+SKILL=~/.claude/skills/putida-rbtnseq      # this skill's directory
+```
+
+The dataset location resolves as `$PUTIDA_RBTNSEQ_DATA`, else `$SKILL/data`. So either
+export the variable, or link the dataset into the skill and nothing else is needed:
+
+```bash
+ln -s /path/to/rbtnseq "$SKILL/data"       # one-time; `data` is gitignored
 ```
 
 ## How to invoke

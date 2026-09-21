@@ -1,5 +1,7 @@
 # The dataset is never committed — see docs/DATA.md
-data/
+# (anchored, and without a trailing slash, so a SYMLINK to a data
+#  directory is ignored too — `data/` would not match one)
+/data
 *.parquet
 *.tsv
 *.xlsx
