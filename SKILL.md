@@ -11,20 +11,16 @@ source: paper version (332 experiments, Borchert 2024). Public Fitness Browser s
 
 ## Setup
 
-The dataset is **not** bundled. If the cache is missing, every call raises `DataNotFound`
-with instructions. To set it up, follow `docs/DATA.md` (download ~120 MB, then
-`python scripts/build_cache.py`).
+The dataset ships inside the skill (`data/`, 71 MB). One command after install builds
+the parquet cache; no download, no configuration:
 
 ```bash
 SKILL=~/.claude/skills/putida-rbtnseq      # this skill's directory
+python "$SKILL/scripts/build_cache.py"     # ~2 min, once
 ```
 
-The dataset location resolves as `$PUTIDA_RBTNSEQ_DATA`, else `$SKILL/data`. So either
-export the variable, or link the dataset into the skill and nothing else is needed:
-
-```bash
-ln -s /path/to/rbtnseq "$SKILL/data"       # one-time; `data` is gitignored
-```
+If the cache is missing, every call raises `DataNotFound` with these instructions.
+To point at a dataset stored elsewhere instead, set `$PUTIDA_RBTNSEQ_DATA`.
 
 ## How to invoke
 
@@ -100,5 +96,5 @@ This makes it easy to scan when answering iteratively. Report `|t|`, not signed 
 
 - **Browser**: https://fit.genomics.lbl.gov/cgi-bin/org.cgi?orgId=Putida
   (deep-link a gene with `myFitShow.cgi?orgId=Putida&gene=PP_NNNN`)
-- **Paper**: Borchert et al. 2024, *mSystems* — https://doi.org/10.1128/msystems.00934-24
+- **Paper**: Borchert et al. 2024, *mSystems* — https://doi.org/10.1128/msystems.00942-23
 - **Data setup**: `docs/DATA.md`

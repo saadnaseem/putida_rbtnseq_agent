@@ -9,7 +9,7 @@ Data location
 Resolved in this order:
 
 1. ``$PUTIDA_RBTNSEQ_DATA``  (environment variable)
-2. ``<repo root>/data``      (default; see docs/DATA.md for how to populate it)
+2. ``<repo root>/data``      (default; the raw dataset ships there — see docs/DATA.md)
 
 Matrices
 --------
@@ -74,11 +74,11 @@ def _read(name: str) -> pd.DataFrame:
     if not path.exists():
         raise DataNotFound(
             f"Missing cache file: {path}\n\n"
-            "The dataset is not redistributed with this repository.\n"
-            "  1. Download the source files  -> see docs/DATA.md\n"
-            "  2. Build the cache            -> python scripts/build_cache.py\n"
-            "  3. Or point at an existing copy:\n"
-            "       export PUTIDA_RBTNSEQ_DATA=/path/to/rbtnseq"
+            "The raw dataset ships in data/, but the parquet cache is built on first use.\n"
+            "  Build it:  python scripts/build_cache.py     (~2 min, no network needed)\n\n"
+            "If your data lives elsewhere, point at it instead:\n"
+            "  export PUTIDA_RBTNSEQ_DATA=/path/to/rbtnseq\n\n"
+            "See docs/DATA.md."
         )
     return pd.read_parquet(path)
 

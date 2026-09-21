@@ -8,7 +8,7 @@ Data location is resolved as:
     1. $PUTIDA_RBTNSEQ_DATA
     2. <repo root>/data
 
-See docs/DATA.md for how to obtain the source files.
+The raw source files ship in data/; see docs/DATA.md for provenance and refreshing.
 
 Usage:
     python scripts/build_cache.py

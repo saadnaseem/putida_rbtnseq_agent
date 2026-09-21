@@ -46,13 +46,13 @@ quirks handled rather than papered over.
 git clone https://github.com/saadnaseem/putida_rbtnseq_agent.git
 cd putida_rbtnseq_agent
 pip install -r requirements.txt
-
-export PUTIDA_RBTNSEQ_DATA=~/data/rbtnseq    # where the dataset will live
-./scripts/fetch_data.sh                      # Fitness Browser files (~35 MB)
-# two files need a manual download — see docs/DATA.md
-python scripts/build_cache.py                # ~2 min
+python scripts/build_cache.py                # ~2 min, no network needed
 pytest -q                                    # 25 tests
 ```
+
+**The dataset ships with the repository** — `data/` holds all 11 source files (71 MB).
+There is nothing to download and nothing to configure. The build step converts them to
+the parquet cache the API reads.
 
 Then:
 
@@ -102,11 +102,26 @@ data rather than from annotation.
 
 ## Data
 
-**No data is redistributed here.** The sources carry their own terms and one is a journal
-supplement. [**docs/DATA.md**](docs/DATA.md) is the complete acquisition protocol:
-7 files scripted, 2 manual, ~120 MB, ~2 minutes to build.
+The repository is self-contained: `data/` carries all 11 source files, 71 MB, committed.
 
-Data location resolves as `$PUTIDA_RBTNSEQ_DATA`, else `<repo>/data` (gitignored).
+| Source | Files | Licence |
+|---|---|---|
+| LBNL Fitness Browser (Price, Deutschbauer, Arkin) | 9 — fitness & t matrices, experiment metadata, gene table, reannotations, cofitness, specific phenotypes, genome FASTA | CC BY 4.0 |
+| Borchert et al. 2024 supplement | `fModule_Metadata.xlsx` (the 332-experiment matrices) | CC BY 4.0 |
+| UniProt proteome UP000000556 | `uniprot_putida.csv` | CC BY 4.0 |
+
+All three are CC BY 4.0, so they are redistributed here with attribution.
+[**DATA_LICENSE.md**](DATA_LICENSE.md) records provenance, licence and retrieval date for
+every file. **The MIT licence covers the code only.**
+
+The derived parquet cache (`data/cache/`, 45 MB) is *not* committed — `build_cache.py`
+regenerates it byte-identically, and committing rebuilt binaries would bloat history.
+
+Data location resolves as `$PUTIDA_RBTNSEQ_DATA` if set, else `<repo>/data`. Set the
+variable only if you want to point at a copy elsewhere.
+
+To refresh from upstream: `./scripts/fetch_data.sh` — see
+[docs/DATA.md](docs/DATA.md).
 
 ---
 
@@ -215,16 +230,18 @@ skill can find the cache.
 ## Layout
 
 ```
+data/                    the dataset itself, 11 files, 71 MB (cache/ is gitignored)
 scripts/
   putida_rbtnseq.py      the API — everything goes through here
   build_cache.py         raw sources → parquet cache (+ MANIFEST.json)
-  fetch_data.sh          download the Fitness Browser files
+  fetch_data.sh          re-download the Fitness Browser files
   examples/              three runnable end-to-end scripts
 references/              biology, file schemas, workflows, fModules
 docs/
-  DATA.md                acquisition protocol
+  DATA.md                provenance and how to refresh
   DATA_CAVEATS.md        the traps, with evidence
-tests/                   24 regression tests
+tests/                   25 regression tests
+DATA_LICENSE.md          per-file data provenance and licence
 SKILL.md                 Claude Code skill definition
 ```
 
@@ -234,9 +251,10 @@ SKILL.md                 Claude Code skill definition
 
 If this is useful, cite the data — not this wrapper:
 
-- **Borchert AJ, Bleem AC, Lim HG, et al.** Machine learning and systems biology approaches
-  reveal fitness modules in *Pseudomonas putida* KT2440. *mSystems* (2024).
-  <https://doi.org/10.1128/msystems.00934-24>
+- **Borchert AJ, Bleem AC, Lim HG, Rychel K, Dooley KD, Kellermyer ZA, Hodges TL,
+  Palsson BO, Beckham GT.** Machine learning analysis of RB-TnSeq fitness data predicts
+  functional gene modules in *Pseudomonas putida* KT2440. *mSystems* 9(3) (2024).
+  <https://doi.org/10.1128/msystems.00942-23>
 - **Price MN, Wetmore KM, Waters RJ, et al.** Mutant phenotypes for thousands of bacterial
   genes of unknown function. *Nature* 557, 503–509 (2018).
   <https://doi.org/10.1038/s41586-018-0124-0>
@@ -252,7 +270,7 @@ Fitness Browser: <https://fit.genomics.lbl.gov/cgi-bin/org.cgi?orgId=Putida>
 
 Code: [MIT](LICENSE).
 
-The **data is not covered by this licence** and is not distributed here. Fitness Browser
-data is produced by the Arkin and Deutschbauer labs at Lawrence Berkeley National
-Laboratory; observe the terms on their site and the journal supplements when
-redistributing anything derived from them.
+Data in `data/`: **CC BY 4.0**, not MIT — see [DATA_LICENSE.md](DATA_LICENSE.md) for
+per-file provenance, authorship and retrieval dates. Fitness Browser data is produced by
+the Arkin and Deutschbauer labs at Lawrence Berkeley National Laboratory. If you use the
+data, cite the papers above rather than this repository.

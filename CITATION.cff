@@ -11,14 +11,14 @@ license: MIT
 references:
   - type: article
     title: >-
-      Machine learning and systems biology approaches reveal fitness modules
-      in Pseudomonas putida KT2440
+      Machine learning analysis of RB-TnSeq fitness data predicts functional
+      gene modules in Pseudomonas putida KT2440
     authors:
       - family-names: Borchert
         given-names: Andrew J.
     journal: mSystems
     year: 2024
-    doi: 10.1128/msystems.00934-24
+    doi: 10.1128/msystems.00942-23
   - type: article
     title: >-
       Mutant phenotypes for thousands of bacterial genes of unknown function

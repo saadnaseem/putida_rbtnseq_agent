@@ -1,20 +1,10 @@
-# The dataset is never committed — see docs/DATA.md
-# (anchored, and without a trailing slash, so a SYMLINK to a data
-#  directory is ignored too — `data/` would not match one)
-/data
-*.parquet
-*.tsv
-*.xlsx
-*.faa
-*.fna
-*.tab
-fit_organism_*.txt
-exp_organism_*.txt
-cofit_organism_*.txt
-specific_phenotypes_*.txt
-MANIFEST.json
+# The raw dataset in data/ IS tracked — this repo is self-contained.
+# Only the derived parquet cache is ignored: scripts/build_cache.py rebuilds it
+# from data/ byte-identically, and committing regenerated binaries would bloat
+# history on every rebuild.
+/data/cache/
 
-# Papers / PDFs are not ours to redistribute
+# Papers are not redistributed here; the DOIs are in README.md
 *.pdf
 
 # Generated figures

@@ -1,33 +1,27 @@
-# Obtaining the dataset
+# The dataset: what ships, and how to refresh it
 
-**No data is redistributed in this repository.** The sources have their own terms and
-one of them (a journal supplement) is not ours to mirror. This document is the complete
-protocol for reconstructing the exact dataset the code expects.
+**The data is in this repository.** `data/` holds all 11 source files (71 MB), committed.
+After `git clone` you need one command and no network:
 
-Total download: **~120 MB**. Build time: **~2 minutes**.
+```bash
+python scripts/build_cache.py    # ~2 min
+```
+
+That converts the raw files into the parquet cache (`data/cache/`, 45 MB) that the API
+reads. The cache is gitignored because `build_cache.py` regenerates it byte-identically.
+
+Licence and per-file provenance: [DATA_LICENSE.md](../DATA_LICENSE.md). All three sources
+are CC BY 4.0.
 
 ---
 
-## 1. Choose where the data lives
+## What's in `data/`
 
-```bash
-export PUTIDA_RBTNSEQ_DATA=~/data/rbtnseq     # anywhere you like
-```
+### From the LBNL Fitness Browser
 
-If you skip this, the code defaults to `<repo>/data`, which is gitignored.
+Retrieved 21 Sept 2026 from <https://fit.genomics.lbl.gov/cgi-bin/org.cgi?orgId=Putida>.
 
----
-
-## 2. Fitness Browser files (automated, ~35 MB)
-
-```bash
-./scripts/fetch_data.sh
-```
-
-This pulls seven files from the LBNL Fitness Browser
-(<https://fit.genomics.lbl.gov/cgi-bin/org.cgi?orgId=Putida>):
-
-| Output file | Source endpoint (`.../cgi-bin/`) | Contents |
+| File | Source endpoint (`.../cgi-bin/`) | Contents |
 |---|---|---|
 | `fit_organism_Putida.tsv` | `createFitData.cgi?orgId=Putida` | Fitness matrix, 4,778 genes × 314 experiments |
 | `t_organism_Putida.tsv` | `createFitData.cgi?orgId=Putida&t=1` | Matching t-like statistics |
@@ -36,25 +30,28 @@ This pulls seven files from the LBNL Fitness Browser
 | `reanno_Putida.tsv` | `downloadReanno.cgi?orgId=Putida` | 41 curated re-annotations |
 | `cofit_organism_Putida.txt` | `createCofitData.cgi?orgId=Putida` | Precomputed top cofitness per gene |
 | `specific_phenotypes_Putida.txt` | `spec.cgi?orgId=Putida&download=1` | The browser's own significant calls |
+| `organism_Putida.fna` | `orgSeqs.cgi?orgId=Putida&type=nt` | Genome assembly (FASTA) |
+| `organism_Putida.faa` | `orgSeqs.cgi?orgId=Putida` | Protein sequences (FASTA) |
+
+The FASTA files are not used by the code; they are included so `data/` is a complete
+mirror of what `references/files.md` documents.
 
 > The Fitness Browser now lists this organism under its reclassified name,
-> **_Aquipseudomonas alloputida_ KT2440**. The `orgId=Putida` handle is unchanged
-> and it is the same strain.
+> **_Aquipseudomonas alloputida_ KT2440**. The `orgId=Putida` handle is unchanged and it
+> is the same strain.
 
----
+### From the Borchert et al. 2024 supplement
 
-## 3. Borchert et al. 2024 supplement (manual, ~23 MB)
+`fModule_Metadata.xlsx`, taken from <https://github.com/beckham-lab/fModule> — the
+repository named in the paper's own data availability statement. Its content was verified
+identical, sheet by sheet, to the published supplement.
 
-`fModule_Metadata.xlsx` is supplementary data from:
+> Borchert AJ, Bleem AC, Lim HG, Rychel K, Dooley KD, Kellermyer ZA, Hodges TL,
+> Palsson BO, Beckham GT. **Machine learning analysis of RB-TnSeq fitness data predicts
+> functional gene modules in *Pseudomonas putida* KT2440.** *mSystems* 9(3) (2024).
+> <https://doi.org/10.1128/msystems.00942-23>
 
-> Borchert AJ, Bleem AC, Lim HG, et al. **Machine learning and systems biology
-> approaches reveal fitness modules in *Pseudomonas putida* KT2440.**
-> *mSystems* (2024). <https://doi.org/10.1128/msystems.00934-24>
-
-Download the supplementary spreadsheet from the article page and save it as
-`$PUTIDA_RBTNSEQ_DATA/fModule_Metadata.xlsx`.
-
-It must contain three sheets, named exactly:
+Three sheets, named exactly:
 
 | Sheet | Shape | Contents |
 |---|---|---|
@@ -62,72 +59,66 @@ It must contain three sheets, named exactly:
 | `T-like_statistics` | 4,732 × 337 | Matching t statistics |
 | `metadata` | 332 × 29 | Experiment metadata (no QC fields) |
 
-This is the **canonical** matrix for analysis — it is a superset of the public
-snapshot (332 vs 314 experiments). See [DATA_CAVEATS.md](DATA_CAVEATS.md) before
-interpreting its `t` column.
+This is the **canonical** matrix for analysis — a superset of the public snapshot
+(332 vs 314 experiments). Read [DATA_CAVEATS.md](DATA_CAVEATS.md) before interpreting its
+`t` column.
+
+### From UniProt
+
+`uniprot_putida.csv` — proteome [UP000000556](https://www.uniprot.org/proteomes/UP000000556),
+used to attach EC numbers, GO terms, pathways and subcellular location. The join key is
+`Gene Names (ordered locus)` → `locusId`; `build_cache.py` renames it.
 
 ---
 
-## 4. UniProt proteome (manual, ~6 MB)
-
-Used to attach EC numbers, GO terms, pathways and subcellular location to genes.
-
-1. Go to <https://www.uniprot.org/proteomes/UP000000556> (*P. putida* KT2440).
-2. View all proteins, then **Download → Format: CSV → Uncompressed**.
-3. Include at least these columns: `Entry`, `Protein names`, `Gene Names (ordered locus)`,
-   `EC number`, `Pathway`, `Function [CC]`, the three `Gene Ontology` columns, and
-   `Subcellular location [CC]`.
-4. Save as `$PUTIDA_RBTNSEQ_DATA/uniprot_putida.csv`
-   (a file named `Pseudomonas_putida_protein_list_*.csv` is also recognised).
-
-The join key is `Gene Names (ordered locus)` → `locusId`; `build_cache.py` renames it.
-
----
-
-## 5. Build the cache
+## Refreshing from upstream
 
 ```bash
-python scripts/build_cache.py
+./scripts/fetch_data.sh          # re-downloads the 7 Fitness Browser tables into data/
+python scripts/build_cache.py --rebuild
+pytest -q
 ```
 
-Expected output (~2 min, dominated by the xlsx read):
+The script skips files that are already present, so delete the ones you want replaced
+first. It does not fetch the FASTA, the xlsx or the UniProt export — those change rarely;
+the table above and the sections above give their URLs.
 
-```
-genes.parquet                          0.22 MB
-reanno.parquet                         0.03 MB
-uniprot.parquet                        2.83 MB
-metadata.parquet                       0.07 MB
-fit.parquet                            4.11 MB
-t.parquet                              6.56 MB
-fit_long.parquet                      10.38 MB
-fit_paper.parquet                      4.19 MB
-t_paper.parquet                        6.50 MB
-fit_paper_long.parquet                10.49 MB
-metadata_paper.parquet                 0.03 MB
-cofit.parquet                          1.50 MB
-specific_phenotypes.parquet            0.08 MB
-```
+**What changes between releases.** Verified by rebuilding from scratch in September 2026
+against a May 2026 copy: all 3,071,316 fitness and t values came back **bit-identical**,
+as did the gene table, metadata and UniProt export. Only curation layers moved —
+`specific_phenotypes` +37 calls (none removed), two `conserved` flags, and the organism
+rename. See [DATA_CAVEATS.md](DATA_CAVEATS.md) §4.
 
-`cache/MANIFEST.json` records row/column counts and a checksum per file so a rebuild
-can be compared against a known-good one.
+`data/cache/MANIFEST.json` records row/column counts and a checksum per cached file, so
+you can pin exactly what an analysis ran against.
 
 ---
 
-## 6. Verify
+## Using a dataset stored elsewhere
+
+The code resolves its data directory as `$PUTIDA_RBTNSEQ_DATA` if set, otherwise
+`<repo>/data`. To point at a copy outside the repo:
+
+```bash
+export PUTIDA_RBTNSEQ_DATA=~/data/rbtnseq
+```
+
+---
+
+## Verify
 
 ```bash
 pytest -q
 ```
 
-25 tests. They check matrix dimensions, join integrity, the documented data caveats, and
+25 tests, covering matrix dimensions, join integrity, the documented data caveats, and
 that the significance rule reproduces the Fitness Browser's own specific-phenotype calls.
-If the cache is absent the data-dependent tests skip rather than fail.
+If the cache is missing, the data-dependent tests skip rather than fail.
 
 ---
 
 ## Note on personal data
 
-`exp_organism_Putida.txt` includes a `person` column naming the researcher who ran each
-experiment, and `dateStarted`. These are part of the public Fitness Browser release. This
-repository neither redistributes nor uses those columns, but be aware they are present in
-your local copy if you plan to share it.
+`exp_organism_Putida.txt` carries `person` and `dateStarted` columns naming the
+researchers who ran each experiment. These are part of the public Fitness Browser release
+and are redistributed unmodified. No code here reads them.
