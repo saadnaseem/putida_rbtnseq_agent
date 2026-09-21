@@ -108,7 +108,54 @@ Guarded by `test_qc_metrics_use_documented_columns`,
 
 ---
 
-## 3. Smaller things worth knowing
+## 3. The matrices are rounded to 3 dp; the phenotype table is not
+
+`fit_organism_Putida.tsv` and `t_organism_Putida.tsv` are rounded to **exactly three
+decimal places** (100% of values equal their own 3-dp rounding; only ~10% equal their
+2-dp rounding). `specific_phenotypes_Putida.txt` carries full float precision.
+
+So the two sources disagree at the threshold boundary. A real example:
+
+| Source | `fit` | passes `|fit| > 1`? |
+|---|---|---|
+| `specific_phenotypes` (full precision) | −1.000258 | yes |
+| `fit_organism_Putida.tsv` (3 dp) | −1.000 | **no** |
+
+`PP_0370` / `set15IT060` is exactly this case. It is the single call that
+`|fit| > 1 & |t| > 4` does not recover from the matrix.
+
+**Practical impact is negligible** — 8 of 2,474 Fitness Browser calls sit within 1% of
+a threshold — but do not treat a `|fit| > 1` test on the matrix as bit-identical to the
+Fitness Browser's own call set. If you need exact agreement on boundary cases, join
+against `specific_phenotypes` rather than recomputing.
+
+The test suite asserts recall > 0.995 **and** that every missed call sits within one
+rounding unit (5e-4) of both thresholds — so a genuine pipeline break still fails loudly
+while a rounding artifact does not.
+
+---
+
+## 4. The Fitness Browser snapshot drifts; the matrices do not
+
+Re-downloading in September 2026 against a May 2026 copy, verified file by file:
+
+| File | Change |
+|---|---|
+| `fit`, `t` (both matrices, all 3,071,316 values) | **bit-identical** — max \|Δ\| = 0 |
+| `genes`, `metadata`, `metadata_paper`, `uniprot` | identical |
+| `specific_phenotypes` | 2,437 → 2,474 calls (**+37, none removed**) |
+| `cofit` | 2 of 95,560 `conserved` flags flipped False → True |
+| `reanno` | `organism` string only: *Pseudomonas putida* → *Aquipseudomonas alloputida* |
+
+The numeric core is stable and reproducible; curation layers grow additively. Pin
+`cache/MANIFEST.json` if you need an exact record of what a given analysis ran against.
+
+The organism rename is a taxonomic reclassification, not a different strain. The Fitness
+Browser still keys it as `orgId=Putida`.
+
+---
+
+## 5. Smaller things worth knowing
 
 - **929 of 5,661 annotated genes have no fitness data** — essential genes, or genes with
   too few transposon insertions to score. `gene()` returns their annotation with

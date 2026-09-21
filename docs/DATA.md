@@ -119,7 +119,7 @@ can be compared against a known-good one.
 pytest -q
 ```
 
-24 tests. They check matrix dimensions, join integrity, the documented data caveats, and
+25 tests. They check matrix dimensions, join integrity, the documented data caveats, and
 that the significance rule reproduces the Fitness Browser's own specific-phenotype calls.
 If the cache is absent the data-dependent tests skip rather than fail.
 

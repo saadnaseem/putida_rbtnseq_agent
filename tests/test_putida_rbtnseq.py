@@ -99,17 +99,52 @@ def test_has_signed_t_flag():
 
 # ------------------------------------------------------- end-to-end validation
 
+# The downloadable matrices are rounded to 3 decimal places; the
+# specific_phenotypes table carries full float precision. A call at
+# fit = -1.000258 therefore arrives in the matrix as -1.0 and fails a strict
+# `|fit| > 1` test. One rounding unit at 3 dp is 5e-4.
+ROUNDING_UNIT = 5e-4
+
+
+@needs_data
+def test_downloadable_matrices_are_rounded_to_three_dp():
+    """Pins the precision assumption that test_significance_rule... relies on."""
+    long = P._long_public()
+    for col in ("fit", "t"):
+        vals = long[col].dropna()
+        assert np.isclose(vals, vals.round(3)).all()
+        assert not np.isclose(vals, vals.round(2)).all()
+
+
 @needs_data
 def test_significance_rule_recovers_fitness_browser_calls():
     """|fit|>1 & |t|>4 on the public matrix recovers the Fitness Browser's own
-    specific-phenotype calls. This validates the whole load -> melt -> join path."""
+    specific-phenotype calls. This validates the whole load -> melt -> join path.
+
+    The Fitness Browser adds calls over time (2,437 in May 2026, 2,474 in
+    September 2026, purely additive), so this asserts a robust floor rather than
+    an exact count. The sharper check is the second one: every missed call must be
+    a rounding-boundary artifact, not a pipeline error.
+    """
     spec = P._specific()
     fb = set(zip(spec["locusId"].astype(str), spec["expName"].astype(str)))
     pub = P._long_public().dropna(subset=["fit", "t"])
     mine = pub[(pub["fit"].abs() > 1) & (pub["t"].abs() > 4)]
     ours = set(zip(mine["locusId"].astype(str), mine["expName"].astype(str)))
+
     recall = len(fb & ours) / len(fb)
-    assert recall > 0.999, f"recall of Fitness Browser calls dropped to {recall:.3f}"
+    assert recall > 0.995, f"recall of Fitness Browser calls dropped to {recall:.4f}"
+
+    # Every miss must sit within one rounding unit of both thresholds.
+    idx = pub.set_index(["locusId", "expName"])
+    for key in fb - ours:
+        if key not in idx.index:
+            raise AssertionError(f"{key} is missing from the fitness matrix entirely")
+        row = idx.loc[key]
+        fit, t = abs(float(row["fit"])), abs(float(row["t"]))
+        assert fit >= 1 - ROUNDING_UNIT and t >= 4 - ROUNDING_UNIT, (
+            f"{key} missed for a reason other than rounding: |fit|={fit}, |t|={t}"
+        )
 
 
 # -------------------------------------------------------------- gene-level API

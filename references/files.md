@@ -39,7 +39,7 @@ Raw data lives at `$PUTIDA_RBTNSEQ_DATA/`. Parquet cache (auto-built by `scripts
 
 ### Derived
 - `cofit_organism_Putida.txt` — 95,560 rows. Per-gene top cofit neighbors (Pearson corr of fitness profiles). Cols: `orgId, locusId, sysName, name, desc, hitId, hitSysName, hitName, hitDesc, rank, cofit, conserved`. `conserved=TRUE` = same cofit relationship in orthologs (high-confidence).
-- `specific_phenotypes_Putida.txt` — 2,437 pre-filtered (|fit|>1, |t|>4) gene-condition phenotypes: `expGroup, expName, condition_1, locusId, sysName, gene, desc, fit, t, conserved`
+- `specific_phenotypes_Putida.txt` — ~2,470 pre-filtered (count grows as the browser curates; +37 between May and Sept 2026) (|fit|>1, |t|>4) gene-condition phenotypes: `expGroup, expName, condition_1, locusId, sysName, gene, desc, fit, t, conserved`
 
 ### Background
 - `f-gene-modules.pdf` — Borchert et al. 2024, *mSystems*: ICA on this fitness matrix → 84 fModules. The xlsx is the input matrix.

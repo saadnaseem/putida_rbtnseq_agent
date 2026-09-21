@@ -51,7 +51,7 @@ export PUTIDA_RBTNSEQ_DATA=~/data/rbtnseq    # where the dataset will live
 ./scripts/fetch_data.sh                      # Fitness Browser files (~35 MB)
 # two files need a manual download — see docs/DATA.md
 python scripts/build_cache.py                # ~2 min
-pytest -q                                    # 24 tests
+pytest -q                                    # 25 tests
 ```
 
 Then:
@@ -169,17 +169,27 @@ sheet, pitfalls), `files.md` (schemas and join keys), `workflows.md` (end-to-end
 ## Validation
 
 ```bash
-pytest -q     # 24 passed
+pytest -q     # 25 passed
 ```
 
-Beyond unit coverage, the suite checks that the pipeline reproduces an external ground
-truth: applying `|fit| > 1 & |t| > 4` to the public matrix recovers **2,436 of the
-Fitness Browser's own 2,437 specific-phenotype calls (100.0% recall)**. That exercises the
-whole load → melt → join path against numbers this repository did not compute.
+Beyond unit coverage, the suite checks the pipeline against an external ground truth:
+applying `|fit| > 1 & |t| > 4` to the public matrix recovers **2,473 of the Fitness
+Browser's own 2,474 specific-phenotype calls (99.96%)**. That exercises the whole
+load → melt → join path against numbers this repository did not compute. The single miss
+is a rounding artifact, not an error — the matrices are rounded to 3 dp while the
+phenotype table is not, so a call at `fit = −1.000258` arrives as `−1.000`. The test
+asserts that every miss sits within one rounding unit of the thresholds, so a real
+pipeline break still fails loudly.
 
 It also pins matrix dimensions, join integrity (no duplicate gene×experiment pairs, no
-missing values), the two data caveats above, and graceful handling of the 929 genes with
-no fitness data.
+missing values), the data caveats above, and graceful handling of the 929 genes with no
+fitness data.
+
+**Reproducibility was checked end to end**: following `docs/DATA.md` from scratch in
+September 2026 against a May 2026 copy reproduced all 3,071,316 fitness and t values
+**bit-identically** (max |Δ| = 0). Only the curation layers had grown — `specific_phenotypes`
++37 calls, two `conserved` flags, and the organism rename to *Aquipseudomonas alloputida*.
+Details in [docs/DATA_CAVEATS.md](docs/DATA_CAVEATS.md).
 
 Verified on **pandas 2.3.3** (test suite) and **pandas 3.0.3** (full API pass, warnings as
 errors). Data-dependent tests skip when the cache is absent, so the suite is safe in CI.
