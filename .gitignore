@@ -1,0 +1,36 @@
+# The dataset is never committed — see docs/DATA.md
+data/
+*.parquet
+*.tsv
+*.xlsx
+*.faa
+*.fna
+*.tab
+fit_organism_*.txt
+exp_organism_*.txt
+cofit_organism_*.txt
+specific_phenotypes_*.txt
+MANIFEST.json
+
+# Papers / PDFs are not ours to redistribute
+*.pdf
+
+# Generated figures
+*.png
+*.svg
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/

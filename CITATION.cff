@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+title: putida_rbtnseq_agent
+message: >-
+  This software is a wrapper. If you use it, please cite the underlying
+  datasets and papers listed in `references` below.
+type: software
+authors:
+  - alias: saadnaseem
+repository-code: "https://github.com/saadnaseem/putida_rbtnseq_agent"
+license: MIT
+references:
+  - type: article
+    title: >-
+      Machine learning and systems biology approaches reveal fitness modules
+      in Pseudomonas putida KT2440
+    authors:
+      - family-names: Borchert
+        given-names: Andrew J.
+    journal: mSystems
+    year: 2024
+    doi: 10.1128/msystems.00934-24
+  - type: article
+    title: >-
+      Mutant phenotypes for thousands of bacterial genes of unknown function
+    authors:
+      - family-names: Price
+        given-names: Morgan N.
+    journal: Nature
+    year: 2018
+    doi: 10.1038/s41586-018-0124-0
+  - type: article
+    title: >-
+      Rapid quantification of mutant fitness in diverse bacteria by sequencing
+      randomly bar-coded transposons
+    authors:
+      - family-names: Wetmore
+        given-names: Kelly M.
+    journal: mBio
+    year: 2015
+    doi: 10.1128/mBio.00306-15

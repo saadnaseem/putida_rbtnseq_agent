@@ -1,0 +1,28 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Syntax check the fetch script
+        run: bash -n scripts/fetch_data.sh
+      - name: Run tests
+        # The dataset is not redistributed, so data-dependent tests skip here.
+        # They run locally once `python scripts/build_cache.py` has been run.
+        run: pytest -q -rs
