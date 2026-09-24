@@ -1,7 +1,6 @@
-# putida_rbtnseq_agent
+# rbtnseq_agent
 
-Query and analyse **RB-TnSeq gene-fitness data for _Pseudomonas putida_ KT2440** from the
-LBNL Fitness Browser and the Borchert et al. 2024 fModules paper — as a Python API and as
+Query and analyse **RB-TnSeq gene-fitness data for microbe from  as a Python API and as
 a [Claude Code](https://claude.com/claude-code) skill.
 
 Ask *"what does PP_0154 do?"* and get an answer grounded in 332 competitive-fitness
